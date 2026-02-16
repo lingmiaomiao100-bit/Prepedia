@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, X, Terminal } from 'lucide-react';
+import { MessageSquare, Send, X, Terminal, ThumbsUp, Check } from 'lucide-react';
 import { chatWithAi } from '../services/geminiService';
+import { logAiInteraction } from '../services/supabaseClient';
 import { ChatMessage } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -8,8 +9,7 @@ interface AiAssistantProps {
   contextTitle: string;
 }
 
-// Helper component for message formatting
-const FormattedMessage = ({ text, role }: { text: string, role: 'user' | 'model' }) => {
+const FormattedMessage = ({ text, role, onHelpful, hasRated }: { text: string, role: 'user' | 'model', onHelpful?: () => void, hasRated?: boolean }) => {
   if (role === 'user') return <>{text}</>;
 
   const processBold = (str: string) => {
@@ -49,6 +49,20 @@ const FormattedMessage = ({ text, role }: { text: string, role: 'user' | 'model'
 
         return <p key={i}>{processBold(line)}</p>;
       })}
+      
+      {role === 'model' && (
+        <div className="mt-4 pt-4 border-t border-slate-800 flex justify-end">
+          <button 
+            onClick={onHelpful}
+            disabled={hasRated}
+            className={`flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold transition-all ${
+              hasRated ? 'text-green-500' : 'text-slate-500 hover:text-white'
+            }`}
+          >
+            {hasRated ? <><Check className="w-3 h-3" /> Recorded</> : <><ThumbsUp className="w-3 h-3" /> Helpful?</>}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -56,7 +70,7 @@ const FormattedMessage = ({ text, role }: { text: string, role: 'user' | 'model'
 const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<(ChatMessage & { rated?: boolean })[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -86,6 +100,17 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
     }
   };
 
+  const markHelpful = (idx: number) => {
+    const msg = messages[idx];
+    const prevMsg = messages[idx - 1];
+    if (msg && msg.role === 'model' && !msg.rated) {
+      logAiInteraction(contextTitle, prevMsg?.text || 'N/A', msg.text, true);
+      const newMessages = [...messages];
+      newMessages[idx].rated = true;
+      setMessages(newMessages);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -95,7 +120,6 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
 
   return (
     <>
-      {/* Floating Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -112,7 +136,6 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
@@ -121,7 +144,6 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             className="fixed bottom-8 right-8 w-full max-w-[400px] h-[600px] bg-white dark:bg-slate-900 shadow-2xl z-50 flex flex-col border border-slate-200 dark:border-slate-700 rounded-sm overflow-hidden ring-1 ring-slate-900/5"
           >
-            {/* Header */}
             <div className="bg-slate-900 dark:bg-black p-4 flex justify-between items-center text-white border-b border-slate-800 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="bg-slate-800 dark:bg-slate-900 p-1.5 rounded-sm">
@@ -129,7 +151,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
                 </div>
                 <div>
                   <h3 className="font-bold text-xs uppercase tracking-widest">Prepedia AI</h3>
-                  <p className="text-[10px] text-slate-400 font-mono">Topic: {contextTitle}</p>
+                  <p className="text-[10px] text-slate-400 font-mono">Backend: Connected</p>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition transform hover:rotate-90 duration-200">
@@ -137,16 +159,15 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
               </button>
             </div>
 
-            {/* Messages */}
             <div className="flex-grow p-5 overflow-y-auto space-y-6 bg-slate-50 dark:bg-slate-950">
               {messages.length === 0 && (
                 <div className="text-center mt-20">
                   <div className="w-16 h-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center mx-auto mb-4 rounded-sm shadow-sm">
                       <MessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                   </div>
-                  <p className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">Ready to Help</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">Secure Link Established</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-[200px] mx-auto leading-relaxed">
-                    Ask a question about {contextTitle}. I can explain things simply or give you safety tips.
+                    Ask anything about {contextTitle}. Helpful answers are logged to the school database.
                   </p>
                 </div>
               )}
@@ -164,10 +185,15 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
                     className={`max-w-[90%] p-4 text-sm leading-relaxed border rounded-sm shadow-sm ${
                       msg.role === 'user' 
                         ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 border-slate-200 dark:border-slate-700' 
-                        : 'bg-slate-900 dark:bg-black text-slate-300 border-slate-800 dark:border-slate-900'
+                        : 'bg-slate-900 dark:bg-black text-slate-300 border-slate-800 dark:border-slate-900 w-full'
                     }`}
                   >
-                    <FormattedMessage text={msg.text} role={msg.role} />
+                    <FormattedMessage 
+                      text={msg.text} 
+                      role={msg.role} 
+                      onHelpful={() => markHelpful(idx)} 
+                      hasRated={msg.rated}
+                    />
                   </div>
                 </motion.div>
               ))}
@@ -185,7 +211,6 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ contextTitle }) => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2 border border-slate-300 dark:border-slate-700 p-1 focus-within:border-slate-900 dark:focus-within:border-red-500 transition-colors bg-white dark:bg-slate-950">
                 <input 

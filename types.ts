@@ -3,6 +3,11 @@ export enum Category {
   HEALTH = 'HEALTH'
 }
 
+export interface Citation {
+  name: string;
+  url: string;
+}
+
 export interface Topic {
   id: string;
   title: string;
@@ -10,6 +15,12 @@ export interface Topic {
   shortDescription: string;
   fullDescription: string;
   keyPoints: string[];
+  before: string[];
+  during: string[];
+  after: string[];
+  wikipediaUrl: string;
+  youtubeUrl: string;
+  citations: Citation[];
   imageUrl: string;
   color: string;
 }

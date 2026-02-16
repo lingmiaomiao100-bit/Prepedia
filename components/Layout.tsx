@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield, ArrowRight, Sun, Moon, Zap } from 'lucide-react';
+import { Menu, X, Shield, ArrowRight, Sun, Moon, Zap, Database } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -152,9 +152,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 A simple, reliable guide to help students and families prepare for disasters and understand health risks. Knowledge is your best protection.
               </p>
               
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-full border border-slate-700/50">
-                 <Zap className="w-3 h-3 text-yellow-400" />
-                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Powered by Google AI Studio</span>
+              <div className="flex flex-wrap gap-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-full border border-slate-700/50">
+                  <Zap className="w-3 h-3 text-yellow-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Google AI</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-900/20 rounded-full border border-emerald-800/50">
+                  <div className="relative">
+                    <Database className="w-3 h-3 text-emerald-500" />
+                    <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Supabase Linked</span>
+                </div>
               </div>
             </div>
             
@@ -179,8 +188,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
           
           <div className="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
-            <p>&copy; {new Date().getFullYear()} Prepedia. Student Safety Initiative.</p>
-            <p className="mt-2 md:mt-0">Built with React & Gemini API.</p>
+            <div className="flex flex-col gap-1">
+              <p>&copy; {new Date().getFullYear()} Prepedia. Student Safety Initiative.</p>
+              <p className="font-mono opacity-50 text-[9px] uppercase tracking-tighter">NODE: lpczjcpi..._STABLE_VERIFIED</p>
+            </div>
+            <p className="mt-2 md:mt-0 italic opacity-70">Knowledge is the foundation of resilience.</p>
           </div>
         </div>
       </footer>

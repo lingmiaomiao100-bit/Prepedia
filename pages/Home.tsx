@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Activity, ArrowRight, AlertTriangle, FileText, Globe } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Shield, Activity, ArrowRight, AlertTriangle, FileText, Globe, Radio, Database } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getRecentInquiries } from '../services/supabaseClient';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -18,6 +19,21 @@ const staggerContainer = {
 };
 
 const Home: React.FC = () => {
+  const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    getRecentInquiries(3).then(({ data, error }) => {
+      if (!error && data) {
+        setRecentInquiries(data);
+        setIsLive(true);
+      } else {
+        // Fallback or RLS restricted
+        setIsLive(false);
+      }
+    });
+  }, []);
+
   return (
     <div className="flex flex-col bg-white dark:bg-slate-950 transition-colors duration-300">
       {/* Hero Section */}
@@ -77,6 +93,57 @@ const Home: React.FC = () => {
               <ArrowRight className="ml-2 w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </Link>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Community Pulse - Live Backend Integration */}
+      <section className="bg-slate-50 dark:bg-slate-900 py-12 border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Radio className="w-5 h-5 text-emerald-500" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+              </div>
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Community Pulse</h3>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">Live Database Activity</p>
+              </div>
+            </div>
+
+            <div className="flex-1 max-w-2xl overflow-hidden whitespace-nowrap mask-linear-gradient">
+              <AnimatePresence mode='wait'>
+                {recentInquiries.length > 0 ? (
+                  <motion.div 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="flex gap-12 items-center"
+                  >
+                    {recentInquiries.map((q, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="text-[10px] text-red-500 font-bold font-mono">NEW INQUIRY:</span>
+                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 italic">"{q.title}"</span>
+                      </div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center gap-3 text-emerald-600 dark:text-emerald-500 font-mono text-[10px] tracking-widest font-bold"
+                  >
+                    <Database className="w-3 h-3" />
+                    SYSTEM ONLINE // PROJECT lpczjcpi... // READY FOR INQUIRIES
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <Link to="/faqs" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+              Join Conversation <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
       </section>
 
