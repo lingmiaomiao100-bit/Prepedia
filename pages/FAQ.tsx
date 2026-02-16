@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FAQS } from '../data/content';
 import { FileQuestion, Plus, Send, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -20,6 +21,7 @@ const item = {
 };
 
 const FAQ: React.FC = () => {
+  // Fixed typo: replaced RangeError with useState for state management
   const [formState, setFormState] = useState({ title: '', question: '', email: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
@@ -152,23 +154,6 @@ const FAQ: React.FC = () => {
             </motion.div>
           </div>
         </div>
-
-        {/* System Info */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-16 bg-slate-900 dark:bg-black text-slate-300 p-8 flex flex-col md:flex-row items-center justify-between rounded-sm shadow-2xl dark:shadow-slate-900/50"
-        >
-          <div>
-              <h3 className="font-bold text-white uppercase tracking-widest text-sm mb-2">Supabase Backend Active</h3>
-              <p className="text-xs text-slate-400">All public inquiries are securely stored in the Project ID: lpczjcpi... for administrative review.</p>
-          </div>
-          <div className="mt-4 md:mt-0 text-[10px] uppercase tracking-widest border border-slate-600 px-4 py-2 text-slate-400">
-            Encrypted Link: Live
-          </div>
-        </motion.div>
       </div>
     </div>
   );

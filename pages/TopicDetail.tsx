@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { TOPICS } from '../data/content';
-import { ArrowLeft, CheckSquare, Info, BookOpen, ShieldAlert, Zap, HeartPulse, Clock, ClipboardCheck, Siren, Activity, ExternalLink, Youtube, Library, Quote } from 'lucide-react';
+import { ArrowLeft, Info, BookOpen, ShieldAlert, Zap, HeartPulse, Clock, ClipboardCheck, Siren, Activity, ExternalLink, Youtube, Library, Quote } from 'lucide-react';
 import TopicBackground from '../components/TopicBackground';
 import { motion } from 'framer-motion';
 
@@ -161,35 +161,47 @@ const TopicDetail: React.FC = () => {
               </div>
             </section>
 
-            {/* FORMAL CITATIONS SECTION */}
+            {/* FORMAL CITATIONS SECTION - REFINED PLACEMENT AND AESTHETICS */}
             <motion.section 
-              {...fadeInUp}
-              className="bg-slate-50 dark:bg-slate-900/30 p-8 rounded-sm border border-slate-200 dark:border-slate-800"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-[#020617] p-10 rounded-sm border border-slate-800 shadow-2xl relative overflow-hidden"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <Quote className="w-5 h-5 text-slate-400" />
-                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Official Citations & References</h2>
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                 <ShieldAlert className="w-32 h-32 text-white" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div className="flex items-center gap-4 mb-10 relative z-10">
+                <Quote className="w-10 h-10 text-slate-500 fill-slate-500/20" />
+                <h2 className="text-lg font-bold uppercase tracking-[0.2em] text-white font-serif">Official Citations & References</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 {topic.citations.map((cite, i) => (
                   <a 
                     key={i}
                     href={cite.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-red-500 transition-colors group"
+                    className="flex items-center justify-between p-6 bg-slate-900/40 border border-slate-800 hover:border-red-600/50 hover:bg-slate-900/60 transition-all group rounded-sm"
                   >
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors">{cite.name}</span>
-                      <span className="text-[10px] text-slate-400 mt-1">Official Resource</span>
+                      <span className="text-sm font-bold text-slate-100 group-hover:text-white transition-colors tracking-wide">{cite.name}</span>
+                      <span className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-bold">Official Resource</span>
                     </div>
-                    <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-red-500" />
+                    <div className="p-2 bg-slate-800/50 rounded-full group-hover:bg-red-600/20 transition-colors">
+                      <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-red-500" />
+                    </div>
                   </a>
                 ))}
               </div>
-              <p className="mt-8 text-[10px] text-slate-400 italic text-center">
-                All safety data is sourced from verified government portals and international health agencies as of {new Date().getFullYear()}.
-              </p>
+              
+              <div className="mt-12 pt-8 border-t border-slate-800 relative z-10">
+                <p className="text-[11px] text-slate-500 italic text-center leading-relaxed tracking-wide">
+                  All safety data is sourced from verified government portals and international health agencies as of 2026.
+                </p>
+              </div>
             </motion.section>
 
           </div>

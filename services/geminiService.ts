@@ -1,13 +1,9 @@
+
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { TOPICS } from "../data/content";
 
-const apiKey = process.env.API_KEY || '';
-
-// Initialize only if key exists
-let ai: GoogleGenAI | null = null;
-if (apiKey) {
-  ai = new GoogleGenAI({ apiKey });
-}
+// Always initialize with the direct process.env.API_KEY as per SDK guidelines
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Simple in-memory cache to prevent redundant calls for the same topic in one session
 const adviceCache: Record<string, string> = {};
@@ -22,7 +18,7 @@ const isQuotaExhausted = (error: any): boolean => {
   // Check direct properties
   if (error?.status === 429 || error?.code === 429) return true;
   
-  // Check nested error object (common in the error structure you provided)
+  // Check nested error object (common in the error structure)
   if (error?.error?.code === 429 || error?.error?.status === "RESOURCE_EXHAUSTED") return true;
   
   // Check if it's a stringified error object or message
@@ -98,8 +94,6 @@ const handleGeminiError = (error: any, topic?: string): string => {
 };
 
 export const generateSafetyAdvice = async (topic: string, question?: string): Promise<string> => {
-  if (!ai) return "AI Service not configured.";
-
   // 1. Check Circuit Breaker
   if (Date.now() < quotaExhaustedUntil) {
     return getLocalFallbackAdvice(topic);
@@ -117,7 +111,8 @@ export const generateSafetyAdvice = async (topic: string, question?: string): Pr
       : `${localContext} Provide 3 short, vital safety tips for "${topic}".`;
 
     const result = await retryWithBackoff(async () => {
-      const response: GenerateContentResponse = await ai!.models.generateContent({
+      // Correct implementation using ai.models.generateContent directly
+      const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: prompt,
         config: {
@@ -140,8 +135,6 @@ export const generateSafetyAdvice = async (topic: string, question?: string): Pr
 };
 
 export const chatWithAi = async (message: string, context: string): Promise<string> => {
-  if (!ai) return "AI Service not configured.";
-
   // Check Circuit Breaker
   if (Date.now() < quotaExhaustedUntil) {
     return "⚠️ The AI helper is currently at capacity. Please refer to the common questions and verified guides on this page.";
@@ -149,7 +142,8 @@ export const chatWithAi = async (message: string, context: string): Promise<stri
 
   try {
     return await retryWithBackoff(async () => {
-      const response: GenerateContentResponse = await ai!.models.generateContent({
+      // Correct implementation using ai.models.generateContent directly
+      const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Context: Prepedia guide for "${context}". User asks: ${message}`,
         config: {
