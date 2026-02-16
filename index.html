@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -6,6 +7,9 @@
     <title>Prepedia - Safety & Health Encyclopedia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+      // Polyfill process.env for browser environments to prevent ReferenceErrors during initialization
+      window.process = window.process || { env: { API_KEY: '' } };
+      
       tailwind.config = {
         darkMode: 'class',
         theme: {
@@ -42,5 +46,7 @@
 </head>
   <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-slate-900 selection:text-white dark:selection:bg-red-700">
     <div id="root"></div>
+    <!-- Entry point for the application module -->
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
